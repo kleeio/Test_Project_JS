@@ -1,0 +1,11 @@
+{
+  "name": "test_project_package",
+  "author": "clay",
+  "version": "1.0.0",
+  "description": "test project, TODOLIST, that allows adding, deleting, and updating customer records stored on a database via an API",
+  "main": "script.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "license": "ISC"
+}
