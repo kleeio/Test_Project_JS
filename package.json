@@ -7,5 +7,22 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "license": "ISC"
+  "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kleeio/Test_Project_JS.git"
+  },
+  "keywords": [
+    "todolist",
+    "node",
+    "express"
+  ],
+  "bugs": {
+    "url": "https://github.com/kleeio/Test_Project_JS/issues"
+  },
+  "homepage": "https://github.com/kleeio/Test_Project_JS#readme",
+  "dependencies": {
+    "pg": "^8.9.0",
+    "sequelize": "^6.28.0"
+  }
 }

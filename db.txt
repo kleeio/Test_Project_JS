@@ -1,0 +1,31 @@
+CREATE TABLE todolists(
+    listname VARCHAR(32) NOT NULL,
+    task TEXT NOT NULL,
+    completed BOOLEAN NOT NULL
+);
+
+
+DB CONTROLS
+list all tables in db
+\list;
+
+show table
+\dt+;
+
+
+//WITH COMPOSITE TYPE of TODOITEM
+
+CREATE TABLE[IF NOT EXISTS] TDLIST(
+    listname VARCHAR(32),
+    task todoItem[]
+)
+
+CREATE TYPE todoItem AS (
+    task TEXT,
+    completed BOOLEAN
+);
+
+insert into todolists(listname, tasks) values(
+    'groceries',
+    ARRAY [('apples', false)::todoitem]
+    );
