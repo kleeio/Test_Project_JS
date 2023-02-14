@@ -51,7 +51,7 @@ User.removeAttribute('id');
 
 
 
-const temp = User.create({ listname: "school", task: "books", completed: false });
+// const temp = User.create({ listname: "school", task: "books", completed: false });
 
 
 
@@ -65,6 +65,10 @@ const temp = User.create({ listname: "school", task: "books", completed: false }
  */
 app.get('/', (req, res) => {
     res.send('Hello World');
+});
+
+app.get('/todolists', function (req, res) {
+    User.findAll({ raw: true }).then(temp => res.send(temp));
 });
 
 /**
