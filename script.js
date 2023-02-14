@@ -4,13 +4,18 @@
  * @version 1.0.0
  * */
 
-const { Sequelize } = require('sequelize');
-//for DB connection and querying
-const { Client } = require("pg");
+const { Sequelize, DataTypes, Model } = require('sequelize');
 const express = require('express');
 const app = express();
+// requested body text to json obj
+const parser = require("body-parser");
+// server listening on
 const PORT = 5431;
+//for DB connection, query, and update
+const { Client } = require("pg");
 const DBPORT = 5432;
+
+app.use(parser.json());
 
 /**
  * Database Connection
@@ -20,22 +25,33 @@ const DBPORT = 5432;
 //     dialect: 'postgres'
 // });
 
-// const client = new Client({
-//     user: 'clay',
-//     host: 'localhost',
-//     database: 'postgres',
-//     password: '',
-//     port: PORT,
-// })
-// client.connect(function (err) {
-//     if (err) throw err;
-//     console.log("Connected!");
-// });
 
-// client.query('SELECT * FROM todolists', (err, res) => {
-//     console.log(err, res)
-//     client.end()
-// })
+const sequelize_conn = new Sequelize('postgres://clay:@localhost:5432/postgres');
+
+try {
+    sequelize_conn.authenticate();
+    console.log(`Connection has been established successfully on port ${DBPORT}.`);
+} catch (error) {
+    console.error('Unable to connect to the database:', error);
+}
+
+const User = sequelize_conn.define('todolists',
+    {
+        listname: DataTypes.TEXT,
+        task: DataTypes.TEXT,
+        completed: DataTypes.BOOLEAN,
+    },
+    {
+        timestamps: false,
+        allowNull: false
+    }
+);
+
+User.removeAttribute('id');
+
+
+
+const temp = User.create({ listname: "school", task: "books", completed: false });
 
 
 
@@ -73,3 +89,5 @@ app.get('/', (req, res) => {
 
 
 app.listen(PORT, () => console.log(`Listening on port ${PORT}..`));
+
+// client.end()
