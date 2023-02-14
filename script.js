@@ -64,16 +64,22 @@ User.removeAttribute('id');
  * GET: Get all of the TodoLists
  */
 app.get('/', (req, res) => {
-    res.send('Hello World');
+    res.redirect('/todolists');
 });
 
+// grouping option removes duplicate todoItems
 app.get('/todolists', function (req, res) {
-    User.findAll({ raw: true }).then(temp => res.send(temp));
+    User.findAll({ group: ['listname', 'task', 'completed'] }, { raw: true }).then(temp => res.send(temp));
 });
 
 /**
  * POST: Create a TodoItem for a specific list
  */
+app.post('/addToList', function (req, res) {
+    console.log(req.query.listname);
+    var temp = User.create({ listname: req.query.listname, task: req.query.task, completed: req.query.completed });
+    res.send("adding to list: " + req.query.listname + "\t| task: " + req.query.task);
+});
 
 /**
  * GET: Get all the TodoItem's in the TodoList
