@@ -1,7 +1,10 @@
-CREATE TABLE todolists(
+Just notes on how the database table "todolists" is created.
+As well as some Postgres controls to view tables and to show table;
+
+CREATE TABLE [IF NOT EXISTS] ($1) (
     listname VARCHAR(32) NOT NULL,
-    task TEXT NOT NULL,
-    completed BOOLEAN NOT NULL
+    task TEXT,
+    completed BOOLEAN
 );
 
 
@@ -13,7 +16,7 @@ show table
 \dt+;
 
 
-//WITH COMPOSITE TYPE of TODOITEM
+//WITH COMPOSITE TYPE of TODOITEM; possible extension
 
 CREATE TABLE[IF NOT EXISTS] TDLIST(
     listname VARCHAR(32),
