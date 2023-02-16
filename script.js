@@ -154,9 +154,38 @@ app.put("/updateTask", function (req, res) {
  * DELETE: Delete a TodoListItem
  */
 
+app.delete("/deleteItem", function (req, res) {
+    console.log("attempting to delete entry: " + req.query.listname + " " + req.query.task + " " + req.query.completed);
+
+    const item = User.destroy({
+        where: {
+            listname: req.query.listname,
+            task: req.query.task,
+            completed: req.query.completed
+        }
+    });
+
+    res.send("Deleting entry: " + req.query.listname + " " + req.query.task + " " + req.query.completed);
+});
+
+
 /**
  * DELETE: Delete a TodoList
  */
+
+app.delete("/deleteList", function (req, res) {
+    console.log("attempting to delete entry: " + req.query.listname);
+
+    const item = User.destroy({
+        where: {
+            listname: req.query.listname,
+            // task: req.query.task,
+            // completed: req.query.completed
+        }
+    });
+
+    res.send("Deleting entry: " + req.query.listname);
+});
 
 
 app.listen(PORT, () => console.log(`Listening on port ${PORT}..`));

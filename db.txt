@@ -7,6 +7,8 @@ CREATE TABLE [IF NOT EXISTS] ($1) (
     completed BOOLEAN
 );
 
+DELETE FROM todolists WHERE listname = 'apple' AND task = 'banana' AND completed = true;
+
 
 DB CONTROLS
 list all tables in db
