@@ -21,7 +21,7 @@ app.use(parser.json());
  * Database Connection
  */
 
-const sequelize_conn = new Sequelize('postgres://clay:@localhost:5432/postgres');
+const sequelize_conn = new Sequelize('postgres://clay:@localhost:5432/v2');
 
 try {
     sequelize_conn.authenticate();
@@ -32,25 +32,23 @@ try {
 
 
 /** Model for each todoItem object, represented as three attributes in a row, within the todolists table */
-const User = sequelize_conn.define('todolists',
-    {
-        listname: DataTypes.TEXT,
-        task: DataTypes.TEXT,
-        completed: DataTypes.BOOLEAN,
-    },
-    {
-        timestamps: false,
-        // allowNull: false
-    }
-);
+// const User = sequelize_conn.define('todolists',
+//     {
+//         listname: DataTypes.TEXT,
+//         task: DataTypes.TEXT,
+//         completed: DataTypes.BOOLEAN,
+//     },
+//     {
+//         timestamps: false,
+//         // allowNull: false
+//     }
+// );
 // removes preset ID from Sequelize
-User.removeAttribute('id');
-// console.log(User);
+// User.removeAttribute('id');
 
 
 
 
-// const temp = User.create({ listname: "school", task: "books", completed: false });
 app.get('/', (req, res) => {
     res.redirect('/todolists');
 });
@@ -60,20 +58,28 @@ app.get('/', (req, res) => {
  * POST: Create a TodoList
 */
 app.post('/addNewList', function (req, res) {
-    if (!req.query.listname) {
+    const dbName = req.query.listname;
+    if (!dbName) {
         console.log("No list name provided.");
         res.status(411).send('Must provide a list name; no action taken.');
     }
     else {
-        console.log("added new empty list: " + req.query.listname);// + "\t| task: " + req.query.task + "\t| completed? : " + req.query.completed);
+        console.log("added new empty list: " + dbName);// + "\t| task: " + req.query.task + "\t| completed? : " + req.query.completed);
 
-        User.create({
-            listname: req.query.listname,
-            task: req.query.task,
-            completed: req.query.completed
-        });
+        // const todoItem = sequelize_conn.define(req.query.listname, {
+        //     task: {
+        //         type: DataTypes.TEXT,
+        //         allowNull: true
+        //     },
+        //     completed: {
+        //         type: DataTypes.BOOLEAN,
+        //         allowNull: true
+        //     }
+        // });
 
-        res.send("added new empty list: " + req.query.listname);// + "\t| task: " + req.query.task + "\t| completed? : " + req.query.completed);
+        const todoItem = sequelize_conn.query(`CREATE TABLE IF NOT EXISTS ${dbName} ( task TEXT, completed BOOLEAN);`);
+
+        res.send("added new empty list table: " + dbName);// + "\t| task: " + req.query.task + "\t| completed? : " + req.query.completed);
     }
     // var newListName = req.query.listname;
     // var list = sequelize_conn.query(`CREATE TABLE IF NOT EXISTS ${newListName} ( listname VARCHAR(32) NOT NULL, task TEXT, completed BOOLEAN);`, req.query.listname);

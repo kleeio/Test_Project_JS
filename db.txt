@@ -1,6 +1,19 @@
 Just notes on how the database table "todolists" is created.
 As well as some Postgres controls to view tables and to show table;
 
+CREATE TABLE todoLists(
+    id SERIAL PRIMARY KEY NOT NULL,
+    listname varchar(32) NOT NULL
+);
+
+CREATE TABLE todoItems(
+    listID INTEGER NOT NULL,
+    item TEXT NOT NULL,
+    completed BOOLEAN NOT NULL
+);
+
+
+
 CREATE TABLE [IF NOT EXISTS] ($1) (
     listname VARCHAR(32) NOT NULL,
     task TEXT,
