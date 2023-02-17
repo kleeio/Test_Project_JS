@@ -21,7 +21,7 @@ app.use(parser.json());
  * Database Connection
  */
 
-const sequelize_conn = new Sequelize('postgres://clay:@localhost:5432/v2');
+const sequelize_conn = new Sequelize('postgres://clay:@localhost:5432/postgres');
 
 try {
     sequelize_conn.authenticate();
@@ -58,38 +58,26 @@ app.get('/', (req, res) => {
  * POST: Create a TodoList
 */
 app.post('/addNewList', function (req, res) {
+
     const dbName = req.query.listname;
+
     if (!dbName) {
         console.log("No list name provided.");
+
         res.status(411).send('Must provide a list name; no action taken.');
     }
     else {
-        console.log("added new empty list: " + dbName);// + "\t| task: " + req.query.task + "\t| completed? : " + req.query.completed);
+        console.log("added new empty list: " + dbName);
 
-        // const todoItem = sequelize_conn.define(req.query.listname, {
-        //     task: {
-        //         type: DataTypes.TEXT,
-        //         allowNull: true
-        //     },
-        //     completed: {
-        //         type: DataTypes.BOOLEAN,
-        //         allowNull: true
-        //     }
-        // });
+        const addList = sequelize_conn.query(`INSERT INTO todolists (listname) VALUES ('${dbName}')`);
 
-        const todoItem = sequelize_conn.query(`CREATE TABLE IF NOT EXISTS ${dbName} ( task TEXT, completed BOOLEAN);`);
-
-        res.send("added new empty list table: " + dbName);// + "\t| task: " + req.query.task + "\t| completed? : " + req.query.completed);
+        res.send("added new empty list table: " + dbName);
     }
-    // var newListName = req.query.listname;
-    // var list = sequelize_conn.query(`CREATE TABLE IF NOT EXISTS ${newListName} ( listname VARCHAR(32) NOT NULL, task TEXT, completed BOOLEAN);`, req.query.listname);
 });
 
 /**
  * GET: Get all of the TodoLists
  */
-
-// grouping option removes duplicate todoItems at response; does not remove entries in DB
 app.get('/getLists', function (req, res) {
     // var all = "\dt;"
     // var result = sequelize_conn.query(`${all}`);

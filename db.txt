@@ -12,6 +12,11 @@ CREATE TABLE todoItems(
     completed BOOLEAN NOT NULL
 );
 
+INSERT into todolists (listname) VALUES ('reading');
+
+
+
+
 
 
 CREATE TABLE [IF NOT EXISTS] ($1) (
