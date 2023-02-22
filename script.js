@@ -30,22 +30,38 @@ try {
     console.error('Unable to connect to the database:', error);
 }
 
+/** Model instance for todoList and todoItem tables*/
+const todoLists = sequelize_conn.define('todolists',
+    {
+        id: {
+            type: DataTypes.INTEGER,
+            primaryKey: true
+        },
+        listname: DataTypes.STRING
+    },
+    {
+        timestamps: false,
+        allowNull: false
+    }
+);
+todoLists.removeAttribute('id');
 
-/** Model for each todoItem object, represented as three attributes in a row, within the todolists table */
-// const User = sequelize_conn.define('todolists',
-//     {
-//         listname: DataTypes.TEXT,
-//         task: DataTypes.TEXT,
-//         completed: DataTypes.BOOLEAN,
-//     },
-//     {
-//         timestamps: false,
-//         // allowNull: false
-//     }
-// );
-// removes preset ID from Sequelize
-// User.removeAttribute('id');
-
+const todoItems = sequelize_conn.define('todoitems',
+    {
+        itemid: {
+            type: DataTypes.INTEGER,
+            primaryKey: true
+        },
+        listid: DataTypes.INTEGER,
+        item: DataTypes.TEXT,
+        completed: DataTypes.BOOLEAN
+    },
+    {
+        timestamps: false,
+        allowNull: false
+    }
+);
+todoItems.removeAttribute('id');
 
 
 
@@ -79,63 +95,91 @@ app.post('/addNewList', function (req, res) {
  * GET: Get all of the TodoLists
  */
 app.get('/getLists', function (req, res) {
-    // var all = "\dt;"
-    // var result = sequelize_conn.query(`${all}`);
-    // console.log(result);
-    // all.findAll({ raw: true }).then(temp => res.send(temp));
-    User.findAll({
-        group: ['listname', 'task', 'completed']
-    }, {
-        raw: true
-    }).then(temp => res.send(temp));
+
+    todoLists.findAll(
+        {
+            raw: true
+        }
+    ).then(temp => res.send(temp));
 });
 
 /**
  * POST: Create a TodoItem for a specific list
  */
-app.post('/addToList', function (req, res) {
-    console.log(req.query.listname);
+app.post('/addToList', async function (req, res) {
 
-    var temp = User.create({
-        listname: req.query.listname,
-        task: req.query.task, completed:
-            req.query.completed
-    });
+    var listID = await todoLists.findOne(
+        {
+            attributes: ['id', 'listname'],
+            where:
+            {
+                listname: req.query.listname
+            }
+        },
+        {
+            returning: false
+        }
+    );
 
-    res.send("adding to list: " + req.query.listname + "\t|| task: " + req.query.task + "\t|| completed? : " + req.query.completed);
+    if (listID != null) {
+        console.log(req.query.listname + " has id: " + listID.id);
+    }
+    else {
+        console.log("list was not found");
+    }
+
+    sequelize_conn.query(`INSERT INTO todoItems (listid, item, completed) VALUES (${listID.id}, '${req.query.item}', false)`);
+
+    res.send("added item: " + req.query.item + " into list: " + req.query.listname + " and automatically marked as incomplete");
 });
 
 /**
  * GET: Get all the TodoItem's in the TodoList
  */
-app.get('/getItems', function (req, res) {
-    console.log(req.query.listname);
-    User.findAll({
-        where: {
-            listname: req.query.listname
+app.get('/getItems', async function (req, res) {
+
+    var listID = await todoLists.findOne(
+        {
+            attributes: ['id', 'listname'],
+            where:
+            {
+                listname: req.query.listname
+            }
         },
-    }, {
-        group: ['listname', 'task', 'completed']
+        {
+            returning: false
+        }
+    );
+
+    if (listID != null) {
+        console.log(req.query.listname + " has list id: " + listID.id);
+    }
+    else {
+        console.log("list was not found");
+    }
+
+    todoItems.findAll({
+        attributes: ['item'],
+        where: {
+            listid: listID.id
+        },
     }, {
         raw: true
     })
         .then(temp => res.send(temp));
-    // var all = "\dt;"
-    // var result = sequelize_conn.query(`${all}`);
-    // console.log(result);
-    // all.findAll({ raw: true }).then(temp => res.send(temp));
 });
 
 /**
  * PUT: Update a TodoItem and mark it as done
  */
-app.put("/updateTask", function (req, res) {
-    console.log(req.query.listname + "\t" + req.query.task);
+app.put("/updateItem", function (req, res) {
 
-    const item = User.update({
+    console.log(req.query.listname + "\t" + req.query.item);
+
+    const item = todoItems.update({
         completed: true
     }, {
-        where: { task: req.query.task }
+        where: { item: req.query.item }
     }, {
         multi: false
     });
@@ -149,17 +193,14 @@ app.put("/updateTask", function (req, res) {
  */
 
 app.delete("/deleteItem", function (req, res) {
-    console.log("attempting to delete entry: " + req.query.listname + " " + req.query.task + " " + req.query.completed);
 
-    const item = User.destroy({
+    const item = todoItems.destroy({
         where: {
-            listname: req.query.listname,
-            task: req.query.task,
-            completed: req.query.completed
+            item: req.query.item,
         }
     });
 
-    res.send("Deleting entry: " + req.query.listname + " " + req.query.task + " " + req.query.completed);
+    res.send("Deleting entry: " + req.query.item);
 });
 
 
@@ -167,12 +208,33 @@ app.delete("/deleteItem", function (req, res) {
  * DELETE: Delete a TodoList
  */
 
-app.delete("/deleteList", function (req, res) {
-    console.log("attempting to delete entry: " + req.query.listname);
+app.delete("/deleteList", async function (req, res) {
 
-    const item = User.destroy({
+    console.log("attempting to delete list: " + req.query.listname);
+
+    var listID = await todoLists.findOne(
+        {
+            attributes: ['id', 'listname'],
+            where:
+            {
+                listname: req.query.listname
+            }
+        },
+        {
+            returning: false
+        }
+    );
+
+    if (listID != null) {
+        console.log(req.query.listname + " has id: " + listID.id);
+    }
+    else {
+        console.log("list was not found");
+    }
+
+    const item = todoItems.destroy({
         where: {
-            listname: req.query.listname,
+            listid: listID.id,
             // task: req.query.task,
             // completed: req.query.completed
         }
